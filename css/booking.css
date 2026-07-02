@@ -1,0 +1,84 @@
+.booking-page {
+    max-width: 800px;
+    margin-top: 40px;
+}
+
+.booking-page h2 {
+    color: var(--accent);
+    margin-bottom: 30px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+.flight-summary-box, .passenger-form-box {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 25px;
+    margin-bottom: 30px;
+}
+
+.flight-summary-box h3, .passenger-form-box h3 {
+    color: #333;
+    font-size: 20px;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.time-detail {
+    border-top: 1px dashed #ddd;
+    margin-top: 10px;
+    justify-content: space-around;
+    text-align: center;
+}
+
+.time-detail strong {
+    font-size: 28px;
+    color: var(--accent);
+    display: block;
+}
+
+.duration-detail {
+    font-weight: 600;
+    color: #999;
+}
+
+.date-detail {
+    font-size: 14px;
+    color: #666;
+    margin: 5px 0 0 0;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    font-weight: 500;
+    color: #444;
+}
+
+.btn-checkout {
+    background-color: #27ae60; 
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 6px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.btn-checkout:hover {
+    background-color: #2ecc71;
+}

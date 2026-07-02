@@ -1,0 +1,93 @@
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: linear-gradient(180deg, #f0faff 0%, #ffffff 100%);
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+.hero-guide {
+     background: linear-gradient(rgba(0,191,255,0.6), rgba(135, 206, 250, 0)),
+                url('../img/backgound.jpg') center/cover no-repeat fixed;
+    color: white;
+    text-align: center;
+    padding: 80px 20px 20px;
+}
+
+.hero-guide h1 {
+    font-size: 2.8rem;
+    margin-bottom: 15px;
+}
+.hero-guide p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+.steps {
+    text-align: center;
+    padding: 60px 30px;
+    background: linear-gradient(rgba(0, 191, 255, 0), rgba(135, 206, 250, 0)), url(../img/backgound.jpg) center / cover no-repeat fixed;
+}
+
+.steps h2 {
+    font-size: 2rem;
+    color: #0078D7;
+    margin-bottom: 40px;
+}
+
+.step-container {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.9);
+    border-radius: 16px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+    animation: fadeInUp 1.2s ease-in-out;
+}
+
+.step img {
+    width: 45%;
+    object-fit: cover;
+}
+
+.step .text {
+    padding: 25px;
+    text-align: left;
+}
+
+.step h3 {
+    color: #005fa3;
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+}
+
+.step p {
+    line-height: 1.6;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(-20px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+@keyframes fadeInUp {
+    from {opacity: 0; transform: translateY(30px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+@media (max-width: 768px) {
+    .step {
+        flex-direction: column;
+    }
+    .step img {
+        width: 100%;
+    }
+}

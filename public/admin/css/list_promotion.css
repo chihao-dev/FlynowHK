@@ -1,0 +1,67 @@
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+.admin-header h2 {
+    font-weight: 700;
+    color: #0d6efd;
+}
+.btn-add {
+    background: linear-gradient(135deg, #00b4db, #0083b0);
+    color: white;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 18px;
+    transition: 0.2s;
+}
+.btn-add:hover { opacity: 0.9; }
+table {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+thead {
+    background: #e9f3ff;
+    color: #0056b3;
+    font-weight: 600;
+}
+td, th {
+    vertical-align: middle;
+    text-align: center;
+}
+.btn-edit {
+    background-color: #ffc107;
+    color: black;
+    border: none;
+}
+.btn-delete {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+}
+.btn-edit:hover, .btn-delete:hover {
+    opacity: 0.85;
+}
+img.airline-logo {
+    height: 40px;
+    border-radius: 6px;
+}
+
+.filter-bar {
+    border-radius: 12px !important;
+    border: 1px solid #dce6f3;
+}
+
+.filter-bar input,
+.filter-bar select {
+    border-radius: 10px !important;
+    padding: 8px 10px;
+}
+
+.sticky-top {
+    background: white;
+}

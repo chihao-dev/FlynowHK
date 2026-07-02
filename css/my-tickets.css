@@ -1,0 +1,211 @@
+.flights-page {
+    padding-bottom: 5%;
+    background: linear-gradient(rgba(0, 191, 255, 0.4), rgba(135, 206, 250, 0.4)), url(../img/backgound.jpg) center / cover no-repeat fixed;
+}
+
+h1 {
+    text-align: center;
+    color: #003366;
+    margin-bottom: 0px;
+    margin-top: 0;
+    padding: 40px;
+}
+
+.ticket {
+    display: flex;
+    width: 900px;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    overflow: hidden;
+    position: relative;
+}
+
+
+.ticket::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 65%;
+    width: 2px;
+    border-right: 2px dashed #ccc;
+}
+
+.ticket-left {
+    width: 65%;
+    padding: 25px 30px;
+    box-sizing: border-box;
+}
+
+.ticket-right {
+    width: 35%;
+    background: #f4f8ff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+}
+
+.airline-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.airline-info img {
+    height: 40px;
+    margin-right: 10px;
+}
+
+.flight-route {
+    font-size: 22px;
+    font-weight: 600;
+    color: #003366;
+    margin-bottom: 8px;
+}
+
+.flight-time {
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.info-group {
+    margin-bottom: 8px;
+}
+
+.info-label {
+    color: #888;
+    font-size: 13px;
+}
+
+.info-value {
+    font-weight: 600;
+    color: #333;
+}
+
+.qr-code {
+    margin-bottom: 10px;
+}
+
+.booking-code {
+    font-weight: bold;
+    font-size: 18px;
+    color: #003366;
+    margin-bottom: 10px;
+}
+
+.note {
+    font-size: 13px;
+    color: #666;
+    margin-top: 6px;
+}
+
+.price {
+    margin-top: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.ticket-class-banner {
+    height: 50px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 12px 0;
+    border-bottom: 2px solid #ccc;
+    color: #fff;
+    z-index: 2;
+}
+
+.ticket-class-banner.premium { background: linear-gradient(90deg, #ff6a00, #ff8e00); }
+.ticket-class-banner.normal { background: linear-gradient(90deg, #007bff, #00bfff); }
+
+.ticket-left, .ticket-right {
+    padding-top: 50px;
+}
+
+.ticket-class-banner {
+    height: 50px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    font-size: 20px;
+    line-height: 50px;
+    color: #fff;
+    z-index: 2;
+}
+
+.ticket-class-banner.premium { background: linear-gradient(90deg, #ff8c00, #ffa500); } 
+.ticket-class-banner.normal { background: linear-gradient(90deg, #28a745, #3cb371); } 
+.ticket-left, .ticket-right { padding-top: 70px; }
+
+.ticket-left {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.flight-details {
+    background: #f0f8ff;
+    padding: 10px 15px;
+    border-radius: 8px;
+}
+
+.passenger-info {
+    background: #f9f9f9;
+    padding: 10px 15px;
+    border-radius: 8px;
+}
+
+.info-group {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.info-label { font-weight: 600; color: #555; }
+.info-value { font-weight: 500; color: #333; }
+
+.date-divider {
+    text-align: left;         
+    margin: 10px auto 10px;
+    width: 900px;             
+    font-size: 18px;
+    font-weight: bold;
+    color: #004080;
+    border-left: 5px solid #007bff;
+    padding-left: 10px;
+    background: rgba(240, 248, 255, 0.6);
+    border-radius: 4px;
+}
+
+.ticket-detail-page {
+    max-width: 1000px;
+    margin: 20px auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+}
+
+.h1 { text-align: center; color: #003366; margin-bottom: 30px; }
+.section-title { font-size: 18px; font-weight: bold; margin-top: 30px; color: #004080; }
+.details-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.details-table th, .details-table td { border: 1px solid #eee; padding: 8px; text-align: left; }
+.details-table th { background: #f4f8ff; }
+.total-section { margin-top: 20px; font-weight: bold; color: #007bff; }
+.qr-code img { width: 150px; height: 150px; display:block; margin:10px auto; }
+.booking-code { text-align:center; font-weight:bold; font-size:18px; color:#003366; margin-bottom:10px; }
+.note { text-align:center; color:#666; margin-bottom:20px; }
