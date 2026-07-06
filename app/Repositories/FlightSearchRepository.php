@@ -36,6 +36,8 @@ class FlightSearchRepository
             $query->whereDate('flights.departure_time', '<=', $dateReturn);
         }
 
+        $query->where('flights.departure_time', '>', now());
+
         return $query
             ->orderBy('flights.departure_time', 'asc')
             ->get()

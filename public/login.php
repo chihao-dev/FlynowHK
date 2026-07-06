@@ -1,11 +1,20 @@
 <?php
-session_start();
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 require_once __DIR__.'/../db_connect.php';
 require_once __DIR__.'/../app/Http/Controllers/LoginController.php';
 
-$controller = new LoginController($conn);
-$err = $controller->handleLogin(); 
+try {
+    $controller = $app->make(\App\Http\Controllers\LoginController::class);
+    $err = $controller->handleLegacyLogin();
+} catch (Exception $e) {
+    $err = "Lỗi hệ thống: " . $e->getMessage();
+}
 // ⚠ nếu login thành công → controller đã redirect + exit
 ?>
 

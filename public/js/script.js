@@ -157,12 +157,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         data.forEach((flight, index) => {
-            const bookedNormal = flight.booked_normal || 0;
-            const bookedPremium = flight.booked_premium || 0;
-
-            flight.seats_normal_remaining = (flight.seats_normal || 0) - bookedNormal;
-            flight.seats_premium_remaining = (flight.seats_premium || 0) - bookedPremium;
-
+            // Seats are directly decremented in the DB, so flight.seats_normal is the remaining seats
+            
             const depTime = new Date(flight.departure_time).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
             const arrTime = new Date(flight.arrival_time).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
             const priceNumber = Number(flight.base_price) || 0;
@@ -197,8 +193,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <span style="background:#d9f0ff; padding:4px 8px; border-radius:6px;"><i class="fa-solid fa-suitcase-rolling"></i> ${flight.baggage_limit}kg</span>
                     </div>
                     <div style="margin-top:6px; font-size:14px; color:#333; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
-                        <span style="background:#ffe0e0; padding:4px 8px; border-radius:6px;"><i class="fa-solid fa-chair"></i> Thường: ${flight.seats_normal_remaining} / ${flight.seats_normal}</span>
-                        <span style="background:#e0ffe4; padding:4px 8px; border-radius:6px;"><i class="fa-solid fa-couch"></i> Cao cấp: ${flight.seats_premium_remaining} / ${flight.seats_premium}</span>
+                        <span style="background:#ffe0e0; padding:4px 8px; border-radius:6px;"><i class="fa-solid fa-chair"></i> Thường: ${flight.seats_normal} / 60</span>
+                        <span style="background:#e0ffe4; padding:4px 8px; border-radius:6px;"><i class="fa-solid fa-couch"></i> Cao cấp: ${flight.seats_premium} / 40</span>
                     </div>
                 </div>
 

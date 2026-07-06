@@ -22,7 +22,7 @@ function toVietnamDate(dateStr) {
     if (typeof dateStr === 'string') {
         return dateStr.substring(0, 10);
     }
-    
+
     return new Date(dateStr).toLocaleDateString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' });
 }
 
@@ -38,16 +38,21 @@ if (flights.length === 0) {
     return;
 }
 
-flights.forEach(flight => {
-    const depTime = new Date(flight.departure_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-    const arrTime = new Date(flight.arrival_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-    const depDate = new Date(flight.departure_time).toLocaleDateString('vi-VN', { weekday:'short', day:'2-digit', month:'2-digit', year:'numeric' }); // ngày khởi hành
-    const formattedPrice = (Number(flight.base_price) || 0).toLocaleString('vi-VN');
+    flights.forEach(flight => {
+        const depTime = new Date(flight.departure_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        const arrTime = new Date(flight.arrival_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        const depDate = new Date(flight.departure_time).toLocaleDateString('vi-VN', { weekday:'short', day:'2-digit', month:'2-digit', year:'numeric' }); // ngày khởi hành
+        const formattedPrice = (Number(flight.base_price) || 0).toLocaleString('vi-VN');
 
-    container.innerHTML += `
-    <div class="flight-card" style="display:flex; align-items:center; justify-content:space-between; padding:15px; border-radius:14px; box-shadow:0 8px 20px rgba(0,0,0,0.1); margin-bottom:20px; background:#f8faff; gap:15px;">
-        <div class="flight-info" style="display:flex; align-items:center; gap:12px; min-width:180px; background:#e0f0ff; padding:10px; border-radius:10px; flex-shrink:0;">
-        <img src="${flight.logo_url}" alt="${flight.airline_name}" style="width:60px; height:60px; object-fit:contain; border-radius:8px;">
+        // Ensure logo URL is absolute from root
+        const logoUrl = flight.logo_url.startsWith('http') || flight.logo_url.startsWith('/')
+            ? flight.logo_url
+            : '/' + flight.logo_url;
+
+        container.innerHTML += `
+        <div class="flight-card" style="display:flex; align-items:center; justify-content:space-between; padding:15px; border-radius:14px; box-shadow:0 8px 20px rgba(0,0,0,0.1); margin-bottom:20px; background:#f8faff; gap:15px;">
+            <div class="flight-info" style="display:flex; align-items:center; gap:12px; min-width:180px; background:#e0f0ff; padding:10px; border-radius:10px; flex-shrink:0;">
+            <img src="${logoUrl}" alt="${flight.airline_name}" style="width:60px; height:60px; object-fit:contain; border-radius:8px;">
         <div>
             <strong style="font-size:18px;">${flight.airline_name}</strong>
             <div style="font-size:14px; color:#333;"><i class="fa-solid fa-hashtag"></i> ${flight.flight_number}</div>
@@ -72,8 +77,8 @@ flights.forEach(flight => {
             <span style="background:#d9f0ff; padding:4px 8px; border-radius:6px;"><i class="fa-solid fa-suitcase-rolling"></i> ${flight.baggage_limit}kg</span>
             </div>
             <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
-            <span style="background:#ffe0e0; padding:4px 8px; border-radius:6px;"><i class="fa-solid fa-chair"></i> Thường: ${flight.seats_normal_remaining} / 60</span>
-            <span style="background:#e0ffe4; padding:4px 8px; border-radius:6px;"><i class="fa-solid fa-couch"></i> Cao cấp: ${flight.seats_premium_remaining} / 40</span>
+            <span style="background:#ffe0e0; padding:4px 8px; border-radius:6px;"><i class="fa-solid fa-chair"></i> Thường: ${flight.seats_normal} / 60</span>
+            <span style="background:#e0ffe4; padding:4px 8px; border-radius:6px;"><i class="fa-solid fa-couch"></i> Cao cấp: ${flight.seats_premium} / 40</span>
             </div>
         </div>
         </div>
@@ -89,8 +94,12 @@ flights.forEach(flight => {
 }
 
 function handleBooking(flightId) {
-const oldBooking = JSON.parse(localStorage.getItem('booking_data') || '{}');
-const oldFlight = JSON.parse(localStorage.getItem('selected_flight') || '{}');
+const userId = window.FLIGHT_DATA?.user_id || 0;
+const bookingKey = 'booking_data_' + userId;
+const flightKey = 'selected_flight_' + userId;
+
+const oldBooking = JSON.parse(localStorage.getItem(bookingKey) || '{}');
+const oldFlight = JSON.parse(localStorage.getItem(flightKey) || '{}');
 
 if ((oldBooking && (oldBooking.passengers?.length > 0 || oldBooking.contactName)) && oldFlight?.id) {
     const confirmCancel = confirm(
@@ -101,16 +110,16 @@ if ((oldBooking && (oldBooking.passengers?.length > 0 || oldBooking.contactName)
     return;
     }
 
-    localStorage.removeItem('booking_data');
-    localStorage.removeItem('selected_flight');
+    localStorage.removeItem(bookingKey);
+    localStorage.removeItem(flightKey);
 }
 
 const selectedFlight = {
     id: flightId,
-    time: new Date().toISOString(), 
+    time: new Date().toISOString(),
 };
 
-localStorage.setItem('selected_flight', JSON.stringify(selectedFlight));
+localStorage.setItem(flightKey, JSON.stringify(selectedFlight));
 
 window.location.href = `checkout.php?flight_id=${flightId}`;
 }
@@ -141,11 +150,16 @@ document.getElementById('btn-apply-filters').addEventListener('click', () => {
 
     const today = new Date().toLocaleDateString('en-CA');
 
+    const now = new Date();
+
     const filtered = flightsData.filter(f => {
         const flightDate = new Date(f.departure_time).toLocaleDateString('en-CA');
         let ok = true;
 
         if (flightDate < today) return false;
+
+        // Ẩn chuyến đã cất cánh
+        if (new Date(f.departure_time) <= now) return false;
 
         if (airline) ok = ok && f.airline_name === airline;
         if (flightCode) ok = ok && f.flight_number.toUpperCase().includes(flightCode);
@@ -180,7 +194,7 @@ for (let i = 0; i < 30; i++) {
     div.dataset.date = dateStr;
 
     if(new Date(dateStr) < new Date(todayStr)){
-        div.classList.add('disabled'); 
+        div.classList.add('disabled');
     }
 
     div.innerHTML = `<div>${d.toLocaleDateString('vi-VN', { weekday: 'short' })}</div>
@@ -189,7 +203,7 @@ for (let i = 0; i < 30; i++) {
     if (dateStr === todayStr) div.classList.add('active');
 
     div.addEventListener('click', () => {
-        if(div.classList.contains('disabled')) return; 
+        if(div.classList.contains('disabled')) return;
         document.querySelectorAll('.date-item').forEach(el => el.classList.remove('active'));
         div.classList.add('active');
         filterByDate(dateStr);
@@ -248,17 +262,22 @@ sortPriceBtn.addEventListener('click', () => {
 
 function filterByDate(selectedDate) {
     const todayStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' });
+    const now = new Date();
 
     const filtered = flightsData.filter(flight => {
         const flightDate = flight.departure_time.substring(0, 10);
 
         if (flightDate < todayStr) return false;
 
+        // Ẩn chuyến đã cất cánh (departure_time <= thời gian hiện tại)
+        const depTime = new Date(flight.departure_time);
+        if (depTime <= now) return false;
+
         return flightDate === selectedDate;
     });
 
     console.log("Dữ liệu sau khi lọc cho ngày " + selectedDate + ":", filtered);
-    
+
     document.getElementById('flights-title').textContent = "Lịch trình theo ngày";
     renderFlights(filtered);
 }
@@ -299,7 +318,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const flights = window.FLIGHT_DATA.flights || [];
     const hasPostData = window.FLIGHT_DATA.hasPostData;
 
-    
+
     if (hasPostData && flights.length === 0) {
         Swal.fire({
             icon: 'warning',
@@ -330,9 +349,9 @@ document.getElementById('btn-apply-filters').addEventListener('click', function(
     const dateTo = document.getElementById('filter-date-to').value;
 
     if (!airline && !flightCode && !from && !to && !dateFrom && !dateTo) {
-        window.location.href = window.location.pathname; 
+        window.location.href = window.location.pathname;
         return;
     }
 
-    applyFilters(); 
+    applyFilters();
 });

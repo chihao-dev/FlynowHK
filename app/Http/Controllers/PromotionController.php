@@ -15,6 +15,17 @@ class PromotionController extends Controller
         $this->airlineRepo = $airlineRepo;
     }
 
+    /**
+     * Compatibility method for public/promotions.php
+     */
+    public function getPromotionsData()
+    {
+        return [
+            'full_promotions' => $this->promotionService->getAllPromotionsWithAirlines(),
+            'airlines' => $this->airlineRepo->all(),
+        ];
+    }
+
     public function index(Request $request)
     {
         if (session_status() === PHP_SESSION_NONE) {

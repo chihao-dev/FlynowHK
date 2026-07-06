@@ -1,20 +1,104 @@
 <?php
-require __DIR__.'/../db_connect.php';
-require __DIR__.'/../app/Http/Controllers/CheckoutController.php';
+require_once __DIR__.'/../db_connect.php';
+require_once __DIR__.'/../app/Http/Controllers/CheckoutController.php';
 
-$ctrl = new CheckoutController($conn);
+// Use the Laravel container to resolve dependencies (BookingService, PromotionService)
+$ctrl = $app->make(\App\Http\Controllers\CheckoutController::class);
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $json = file_get_contents('php://input');
+    $data = json_decode($json, true);
+    
+    if (empty($data)) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Dữ liệu không hợp lệ']);
+        exit;
+    }
+
+    try {
+        $bookingService = $app->make(\App\Services\BookingService::class);
+        $result = $bookingService->createBooking($data);
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => true,
+            'message' => 'Đặt vé thành công',
+            'server_total' => $result['server_total'],
+            'baggage_extra_kg' => $result['baggage_extra_kg']
+        ]);
+        exit;
+    } catch (\Exception $e) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        exit;
+    }
+}
 
 if (!isset($_GET['flight_id'])) {
-    echo "<script>
-        const savedFlight = localStorage.getItem('selected_flight');
+    $userId = $_SESSION['user_id'] ?? 0;
+    ?>
+    <!DOCTYPE html>
+    <html lang="vi">
+    <head>
+        <meta charset="UTF-8">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    </head>
+    <body>
+    <script>
+        const userId = "<?= $userId ?>";
+        let savedFlight = localStorage.getItem('selected_flight_' + userId);
+
+        if (!savedFlight && userId > 0) {
+            const guestFlight = localStorage.getItem('selected_flight_0');
+            if (guestFlight) {
+                localStorage.setItem('selected_flight_' + userId, guestFlight);
+                localStorage.removeItem('selected_flight_0');
+                const guestBooking = localStorage.getItem('booking_data_0');
+                if (guestBooking) {
+                    localStorage.setItem('booking_data_' + userId, guestBooking);
+                    localStorage.removeItem('booking_data_0');
+                }
+                savedFlight = guestFlight;
+            }
+        }
+
         if (savedFlight) {
             const flight = JSON.parse(savedFlight);
-            window.location.href = 'checkout.php?flight_id=' + flight.id;
+            if (flight && flight.id) {
+                window.location.href = 'checkout.php?flight_id=' + flight.id;
+            } else {
+                showNoFlightAlert();
+            }
         } else {
-            alert('Chưa chọn chuyến bay để đặt!');
-            window.location.href = 'cheap-tickets.php';
+            showNoFlightAlert();
         }
-    </script>";
+
+        function showNoFlightAlert() {
+            Swal.fire({
+                icon: 'info',
+                title: 'Chưa có thông tin đặt vé',
+                text: 'Bạn chưa chọn chuyến bay nào. Vui lòng chọn chuyến bay trước khi thanh toán!',
+                confirmButtonText: 'Quay lại trang đặt vé',
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = 'cheap-tickets.php';
+                }
+            });
+        }
+    </script>
+    </body>
+    </html>
+    <?php
     exit;
 }
 
@@ -56,7 +140,12 @@ include __DIR__.'/includes/header.php';
     </div>
     <div class="flight-info card p-3 mb-4" style="border:1px solid #ccc;border-radius:10px;">
       <div style="display:flex;align-items:center;gap:60px; background: linear-gradient(to bottom, #e3f0ff, #f1f7ff); border-left: 3px solid #d0e4ff;">
-        <img src="<?= $flight['logo_url'] ?>" alt="<?= $flight['airline_name'] ?>" width="80">
+        <?php
+            $logoUrl = (strpos($flight['logo_url'], 'http') === 0 || strpos($flight['logo_url'], '/') === 0)
+                ? $flight['logo_url']
+                : '/' . $flight['logo_url'];
+        ?>
+        <img src="<?= $logoUrl ?>" alt="<?= $flight['airline_name'] ?>" width="80">
 
         <div class="flight-details-info">
           <h3><?= $flight['airline_name'] ?></h3>
@@ -106,8 +195,9 @@ include __DIR__.'/includes/header.php';
       </div>
     </div>
 
-    <h3>Thông tin đặt vé</h3> 
+    <h3>Thông tin đặt vé</h3>
     <form id="bookingForm">
+      <input type="hidden" name="_token" value="<?= csrf_token() ?>">
 
       <div class="passenger-count" style="display:flex; align-items:center; gap:10px;">
           <label>Người lớn:
@@ -149,7 +239,7 @@ include __DIR__.'/includes/header.php';
       <button type="button" class="btn-primary" id="payBtn">Thanh toán</button>
 
     </form>
-    
+
   </div>
 </div>
 
@@ -185,7 +275,7 @@ include __DIR__.'/includes/header.php';
         <button class="btn btn-success" id="confirmSeatBtn">Xác nhận chọn ghế</button>
       </div>
     </div>
-  </div>	
+  </div>
 </div>
 
 <script>
@@ -197,7 +287,7 @@ window.checkoutData = {
     promotions: <?= json_encode($promotionsData) ?>,
     bookedSeats: <?= json_encode($flightBookedSeats) ?>,
     flight_id: <?= $flight_id ?>,
-    user_id: <?= $user_id ?>,
+    user_id: <?= $user_id ?? 0 ?>,
     departure: "<?= $flight['departure_airport'] ?>",
     arrival: "<?= $flight['arrival_airport'] ?>",
     airline_id: <?= $flight['airline_id'] ?>

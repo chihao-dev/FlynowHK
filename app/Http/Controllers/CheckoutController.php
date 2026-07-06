@@ -17,6 +17,28 @@ class CheckoutController extends Controller
         $this->promotionService = $promotionService;
     }
 
+    /**
+     * Compatibility method for standalone public/checkout.php
+     */
+    public function getCheckoutData($flightId)
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $userId = $_SESSION['user_id'] ?? null;
+
+        $checkoutData = $this->bookingService->getCheckoutData($flightId, $userId);
+        $promotions = $this->promotionService->getAllPromotions();
+
+        return [
+            'flight' => $checkoutData['flight'],
+            'bookedSeats' => $checkoutData['bookedSeats'],
+            'promotions' => $promotions,
+            'defaultName' => $checkoutData['defaultName'],
+            'user_id' => $userId
+        ];
+    }
+
     public function showCheckout(Request $request)
     {
         if (session_status() === PHP_SESSION_NONE) {

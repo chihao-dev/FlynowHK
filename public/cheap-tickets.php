@@ -1,11 +1,12 @@
 <?php
-require __DIR__ . '/../app/Http/Controllers/CheapTicketController.php';
-include __DIR__.'/includes/header.php'; 
+require_once __DIR__ . '/../db_connect.php';
+require_once __DIR__ . '/../app/Http/Controllers/CheapTicketController.php';
 
-include __DIR__ . '/../db_connect.php';
+$controller = $app->make(\App\Http\Controllers\CheapTicketController::class);
+$data = $controller->getSearchData();
+extract($data);
 
-$sql = "SELECT * FROM flights ORDER BY departure_time ASC";
-$result = $conn->query($sql);
+include __DIR__.'/includes/header.php';
 ?>
 
 <!DOCTYPE html>
@@ -48,7 +49,7 @@ body { font-family: Poppins, sans-serif; margin:0; padding:0; background:#f0f2f5
             <label>Điểm đi (From):</label>
             <select id="filter-from">
                 <option value="">Tất cả</option>
-                <?php 
+                <?php
                     $froms = array_unique(array_column($flights, 'departure_airport'));
                     foreach($froms as $f){
                         $label = $airports[$f] ?? $f;
@@ -63,7 +64,7 @@ body { font-family: Poppins, sans-serif; margin:0; padding:0; background:#f0f2f5
             <label>Điểm đến (To):</label>
             <select id="filter-to">
                 <option value="">Tất cả</option>
-                <?php 
+                <?php
                     $tos = array_unique(array_column($flights, 'arrival_airport'));
                     foreach($tos as $t){
                         $label = $airports[$t] ?? $t;
@@ -114,6 +115,7 @@ body { font-family: Poppins, sans-serif; margin:0; padding:0; background:#f0f2f5
     flights: <?= json_encode($flights, JSON_UNESCAPED_UNICODE) ?>,
     selectedDate: "<?= $date_go ?>",
     z: "<?= $_POST['z'] ?? '' ?>",
+    user_id: <?= $_SESSION['user_id'] ?? 0 ?>,
     hasPostData: <?= (!empty($_POST['from']) || !empty($_POST['to']) || !empty($_POST['date_go']) || !empty($_POST['date_return']) || !empty($_POST['airline'])) ? 'true' : 'false' ?>
   };
 </script>

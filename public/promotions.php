@@ -1,5 +1,11 @@
-<?php 
-require __DIR__ . '/../app/Http/Controllers/PromotionController.php';
+<?php
+require_once __DIR__ . '/../db_connect.php';
+require_once __DIR__ . '/../app/Http/Controllers/PromotionController.php';
+
+$controller = $app->make(\App\Http\Controllers\PromotionController::class);
+$data = $controller->getPromotionsData();
+extract($data);
+
 include __DIR__.'/includes/header.php';
 ?>
 
@@ -28,7 +34,7 @@ include __DIR__.'/includes/header.php';
 
             <select id="filterAirline" onchange="applyFilters()">
                 <option value="">-- Chọn hãng --</option>
-                <?php 
+                <?php
                 $airlines = $conn->query("SELECT id, name FROM airlines")->fetch_all(MYSQLI_ASSOC);
                 foreach($airlines as $a) {
                     echo "<option value='{$a['name']}'>" . htmlspecialchars($a['name']) . "</option>";
@@ -45,16 +51,20 @@ include __DIR__.'/includes/header.php';
     </section>
 
     <div class="promo-grid" id="promoGrid">
-        <?php foreach($full_promotions as $promo): ?>
-            <div class="promo-card" 
+        <?php foreach($full_promotions as $promo):
+            $logoUrl = (strpos($promo['logo_url'], 'http') === 0 || strpos($promo['logo_url'], '/') === 0)
+                ? $promo['logo_url']
+                : '/' . $promo['logo_url'];
+        ?>
+            <div class="promo-card"
                  data-code="<?= htmlspecialchars($promo['code']) ?>"
                  data-airline="<?= htmlspecialchars($promo['airline_name']) ?>"
                  data-end="<?= strtotime($promo['end_date']) ?>">
-                <img src="<?= htmlspecialchars($promo['logo_url']) ?>" alt="<?= htmlspecialchars($promo['airline_name']) ?>">
+                <img src="<?= htmlspecialchars($logoUrl) ?>" alt="<?= htmlspecialchars($promo['airline_name']) ?>">
                 <div class="promo-info">
                     <h3><?= htmlspecialchars($promo['airline_name']) ?> - Mã: <span class="code"><?= htmlspecialchars($promo['code']) ?></span></h3>
                     <p class="promo-description"><?= !empty($promo['description']) ? htmlspecialchars($promo['description']) : "Không có mô tả." ?></p>
-                    <p>Điểm đi: <strong><?= $promo['route_from'] === 'ALL' ? 'Tất cả' : htmlspecialchars($promo['route_from']) ?></strong> 
+                    <p>Điểm đi: <strong><?= $promo['route_from'] === 'ALL' ? 'Tất cả' : htmlspecialchars($promo['route_from']) ?></strong>
                        → Điểm đến: <strong><?= $promo['route_to'] === 'ALL' ? 'Tất cả' : htmlspecialchars($promo['route_to']) ?></strong>
                     </p>
                     <p>Áp dụng từ <?= intval($promo['min_tickets']) ?> vé trở lên</p>
@@ -67,11 +77,11 @@ include __DIR__.'/includes/header.php';
 </section>
 
 <script>
-const promotions = <?php 
+const promotions = <?php
     $promoList = $conn->query("
         SELECT * FROM promotions
-    ")->fetch_all(MYSQLI_ASSOC); 
-    echo json_encode($promoList); 
+    ")->fetch_all(MYSQLI_ASSOC);
+    echo json_encode($promoList);
 ?>;
 
 function copyCode(code) {

@@ -52,6 +52,7 @@ class FlightRepository
             ->where('flights.departure_airport', $from)
             ->where('flights.arrival_airport', $to)
             ->where(DB::raw('DATE(flights.departure_time)'), $date)
+            ->where('flights.departure_time', '>', now())
             ->get()
             ->map(function($flight) use ($date) {
                 $f = (array)$flight;

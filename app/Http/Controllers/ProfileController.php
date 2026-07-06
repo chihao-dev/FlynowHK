@@ -14,6 +14,23 @@ class ProfileController extends Controller
         $this->profileService = $profileService;
     }
 
+    /**
+     * Compatibility method for public/profile.php
+     */
+    public function getProfile($userId)
+    {
+        return $this->profileService->getProfile($userId);
+    }
+
+    /**
+     * Compatibility method for public/profile.php
+     */
+    public function updateProfile($userId, $data, $files)
+    {
+        $avatarFile = isset($files['avatar']) && $files['avatar']['error'] === UPLOAD_ERR_OK ? $files['avatar'] : null;
+        return $this->profileService->updateProfile($userId, $data, $avatarFile);
+    }
+
     public function show(Request $request)
     {
         if (session_status() === PHP_SESSION_NONE) {
@@ -29,8 +46,6 @@ class ProfileController extends Controller
 
         return view('profile', [
             'user'   => $user,
-            'msg'    => '',
-            'errors' => []
         ]);
     }
 
@@ -60,13 +75,9 @@ class ProfileController extends Controller
             $updatedUser = $this->profileService->getProfile($userId);
             $_SESSION['fullname'] = $updatedUser['fullname'];
             $_SESSION['avatar']   = $updatedUser['avatar'];
-            return redirect('/profile.php');
+            return redirect()->route('profile')->with('success', 'Cập nhật thành công!');
         }
 
-        return view('profile', [
-            'user'   => $this->profileService->getProfile($userId),
-            'msg'    => '',
-            'errors' => ['Cập nhật thất bại.']
-        ]);
+        return redirect()->back()->withErrors(['msg' => 'Cập nhật thất bại.']);
     }
 }

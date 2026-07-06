@@ -3,14 +3,17 @@ const priceNormal = window.checkoutData.priceNormal;
 const departure = window.checkoutData.departure;
 const arrival = window.checkoutData.arrival;
 const airline = window.checkoutData.airline;
-const baggageLimit = window.checkoutData.baggageLimit; 
-const baggageFeePerKg = window.checkoutData.baggageFeePerKg; 
+const baggageLimit = window.checkoutData.baggageLimit;
+const baggageFeePerKg = window.checkoutData.baggageFeePerKg;
 const promotions = window.checkoutData.promotions;
 const seatsOccupiedServer = window.checkoutData.bookedSeats;
 let preventAutoSave = false;
-  
+
   document.addEventListener('DOMContentLoaded', () => {
-      const saved = localStorage.getItem('booking_data');
+      const userId = window.checkoutData?.user_id || 0;
+      const bookingKey = 'booking_data_' + userId;
+
+      const saved = localStorage.getItem(bookingKey);
       let data = null;
 
       if (saved) {
@@ -38,7 +41,7 @@ let preventAutoSave = false;
               const dobInput = card.querySelector('input[type="date"]');
               const docInput = card.querySelector('input[placeholder="123456789"]');
               const baggageInput = card.querySelector('.baggage-input');
-              
+
 
               if (nameInput) nameInput.value = p.name || '';
               if (genderSelect) genderSelect.value = p.gender || '';
@@ -74,6 +77,9 @@ let preventAutoSave = false;
   });
 
   function saveBookingData() {
+    const userId = window.checkoutData?.user_id || 0;
+    const bookingKey = 'booking_data_' + userId;
+
     const booking = {
       contactName: document.getElementById('contactName')?.value || '',
       contactPhone: document.getElementById('contactPhone')?.value || '',
@@ -101,10 +107,13 @@ let preventAutoSave = false;
       booking.passengers.push(passenger);
     });
 
-    localStorage.setItem('booking_data', JSON.stringify(booking));
+    localStorage.setItem(bookingKey, JSON.stringify(booking));
   }
 
   function renderPassengerInputs() {
+    const userId = window.checkoutData?.user_id || 0;
+    const bookingKey = 'booking_data_' + userId;
+
     const adult = +document.getElementById('adultCount').value || 1;
     const child = +document.getElementById('childCount').value || 0;
     const baby = +document.getElementById('babyCount').value || 0;
@@ -139,7 +148,7 @@ let preventAutoSave = false;
       else if (type === 'baby') genderOptions = `<option value="Bé trai">Bé trai</option><option value="Bé gái">Bé gái</option>`;
 
       return `
-        <div class="passenger-card" data-type="${type}" 
+        <div class="passenger-card" data-type="${type}"
             style="border:1px solid #ccc; padding:10px; margin-bottom:10px; border-radius:6px;">
           <h5>
             ${type === 'adult' ? '(Trên 12 tuổi)<br><br>Người lớn' : type === 'child' ? '(Từ 2 đến dưới 12 tuổi)<br><br>Trẻ em' : '(Dưới 2 tuổi)<br><br>Em bé'} ${i}
@@ -292,8 +301,8 @@ let preventAutoSave = false;
 
               if (airlineMatch && routeMatch && minTicketsOk && dateOk) {
                   valid = true;
-                  promoValue = promo.discount_type === 'fixed' 
-                      ? parseFloat(promo.discount_value) 
+                  promoValue = promo.discount_type === 'fixed'
+                      ? parseFloat(promo.discount_value)
                       : promo.discount_value + '%';
                   break;
               }
@@ -387,7 +396,10 @@ let preventAutoSave = false;
   window.addEventListener('beforeunload', () => {
       if (preventAutoSave) return;
 
-      const prevBooking = JSON.parse(localStorage.getItem('booking_data') || '{}');
+      const userId = window.checkoutData?.user_id || 0;
+      const bookingKey = 'booking_data_' + userId;
+
+      const prevBooking = JSON.parse(localStorage.getItem(bookingKey) || '{}');
 
       const data = {
           contactName: document.getElementById('contactName').value,
@@ -401,29 +413,30 @@ let preventAutoSave = false;
           passengers: prevBooking.passengers || [],
       };
 
-      localStorage.setItem('booking_data', JSON.stringify(data));
+      localStorage.setItem(bookingKey, JSON.stringify(data));
   });
 
   function cancelBooking() {
     Swal.fire({
-      title: 'Hủy đặt vé?',
-      text: 'Thao tác này sẽ xóa toàn bộ thông tin đặt vé đang lưu.',
+      title: 'Hủy quá trình đặt vé?',
+      text: 'Thông tin bạn đã nhập sẽ bị xóa. Bạn có muốn quay lại trang chọn chuyến bay không?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Đồng ý',
-      cancelButtonText: 'Không',
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33'
+      cancelButtonText: 'Không, tiếp tục đặt',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6'
     }).then((result) => {
       if (result.isConfirmed) {
         resetBookingForm();
         Swal.fire({
           icon: 'success',
-          title: 'Đã hủy đặt vé!',
-          text: 'Thông tin đặt vé đã được xóa.',
-          confirmButtonText: 'OK'
+          title: 'Đã hủy!',
+          text: 'Đang chuyển hướng về trang chọn chuyến bay...',
+          timer: 1500,
+          showConfirmButton: false
         }).then(() => {
-          window.location.href = 'index.php';
+          window.location.href = 'cheap-tickets.php';
         });
       }
     });
@@ -463,23 +476,26 @@ let preventAutoSave = false;
   function getSelectedTicketClass() {
       const normal = document.getElementById('ticketNormal');
       const premium = document.getElementById('ticketPremium');
-      if (normal.checked) return 'economy';  
-      if (premium.checked) return 'premium';  
-      return 'economy'; 
+      if (normal.checked) return 'economy';
+      if (premium.checked) return 'premium';
+      return 'economy';
   }
 
   function chooseSeatBtnHandler() {
-      saveBookingData(); 
+      saveBookingData();
       if (!validateBookingForm()) return;
 
-      currentPassengerIndex = 0; 
-      renderSeatMap(); 
+      currentPassengerIndex = 0;
+      renderSeatMap();
       const modalEl = document.getElementById('seatSelectionModal');
       const modal = new bootstrap.Modal(modalEl);
       modal.show();
   }
 
   function renderSeatMap() {
+      const userId = window.checkoutData?.user_id || 0;
+      const bookingKey = 'booking_data_' + userId;
+
       const seatMap = document.getElementById('seatMap');
       seatMap.innerHTML = '';
 
@@ -489,7 +505,7 @@ let preventAutoSave = false;
       const exitRows = ['E'];
 
       const passengerCards = document.querySelectorAll('.passenger-card');
-      const bookingData = JSON.parse(localStorage.getItem('booking_data') || '{}');
+      const bookingData = JSON.parse(localStorage.getItem(bookingKey) || '{}');
       if (!Array.isArray(bookingData.selectedSeats)) bookingData.selectedSeats = [];
 
       let passengerSelect = document.getElementById('passengerSelect');
@@ -552,7 +568,7 @@ let preventAutoSave = false;
                   `;
                   seat.style.pointerEvents = "none";
                   rowDiv.appendChild(seat);
-                  continue; 
+                  continue;
               }
 
               if (bookingData.selectedSeats.includes(seatCode)) {
@@ -563,7 +579,7 @@ let preventAutoSave = false;
                   const selectedSeats = bookingData.selectedSeats || [];
                   const passengerIdx = parseInt(passengerSelect.value);
 
-                  const ticketClass = getSelectedTicketClass(); 
+                  const ticketClass = getSelectedTicketClass();
                   const isPremiumSeat = seat.classList.contains('premium');
                   const isEconomySeat = seat.classList.contains('economy');
 
@@ -573,7 +589,7 @@ let preventAutoSave = false;
                   }
 
                   if (selectedSeats[passengerIdx] === seatCode) {
-                      selectedSeats[passengerIdx] = null; 
+                      selectedSeats[passengerIdx] = null;
                   } else if (!selectedSeats.includes(seatCode)) {
                       selectedSeats[passengerIdx] = seatCode;
                   } else {
@@ -582,7 +598,7 @@ let preventAutoSave = false;
                   }
 
                   bookingData.selectedSeats = selectedSeats;
-                  localStorage.setItem('booking_data', JSON.stringify(bookingData));
+                  localStorage.setItem(bookingKey, JSON.stringify(bookingData));
 
                   document.querySelectorAll('.seat').forEach(s => {
                       if (selectedSeats.includes(s.textContent)) s.classList.add('selected');
@@ -609,13 +625,16 @@ let preventAutoSave = false;
   }
 
   function updateSelectedSeatsInfo() {
-      const bookingData = JSON.parse(localStorage.getItem('booking_data') || '{}');
+      const userId = window.checkoutData?.user_id || 0;
+      const bookingKey = 'booking_data_' + userId;
+
+      const bookingData = JSON.parse(localStorage.getItem(bookingKey) || '{}');
       const passengerCards = document.querySelectorAll('.passenger-card');
       const seatsInfoEl = document.getElementById('selectedSeatsInfo');
       const chooseSeatBtn = document.getElementById('chooseSeatBtn');
       if (!seatsInfoEl || !chooseSeatBtn) return;
 
-      seatsInfoEl.innerHTML = ''; 
+      seatsInfoEl.innerHTML = '';
 
       if (Array.isArray(bookingData.selectedSeats) && bookingData.selectedSeats.some(s => s)) {
           let html = '';
@@ -660,8 +679,11 @@ let preventAutoSave = false;
   }
 
   document.getElementById('confirmSeatBtn').addEventListener('click', () => {
+      const userId = window.checkoutData?.user_id || 0;
+      const bookingKey = 'booking_data_' + userId;
+
       const passengerCards = document.querySelectorAll('.passenger-card');
-      const bookingData = JSON.parse(localStorage.getItem('booking_data') || '{}');
+      const bookingData = JSON.parse(localStorage.getItem(bookingKey) || '{}');
       if (!Array.isArray(bookingData.selectedSeats)) bookingData.selectedSeats = [];
 
       if (bookingData.selectedSeats.length < passengerCards.length || bookingData.selectedSeats.includes(null)) {
@@ -683,7 +705,10 @@ let preventAutoSave = false;
 
 
   function renderSelectedSeatsInfo() {
-      const bookingData = JSON.parse(localStorage.getItem('booking_data') || '{}');
+      const userId = window.checkoutData?.user_id || 0;
+      const bookingKey = 'booking_data_' + userId;
+
+      const bookingData = JSON.parse(localStorage.getItem(bookingKey) || '{}');
       const seatsInfoEl = document.getElementById('selectedSeatsInfo');
       const chooseSeatBtn = document.getElementById('chooseSeatBtn');
       if (!seatsInfoEl || !chooseSeatBtn) return;
@@ -733,9 +758,25 @@ let preventAutoSave = false;
       }
   }
 
-  
+
   document.getElementById('payBtn').addEventListener('click', () => {
-      const bookingData = JSON.parse(localStorage.getItem('booking_data') || '{}');
+      if (!window.checkoutData || !window.checkoutData.flight_id) {
+          Swal.fire({
+              icon: 'error',
+              title: 'Lỗi dữ liệu',
+              text: 'Không tìm thấy thông tin chuyến bay. Vui lòng chọn lại!',
+              confirmButtonText: 'Quay lại trang đặt vé'
+          }).then(() => {
+              window.location.href = 'cheap-tickets.php';
+          });
+          return;
+      }
+
+      const userId = window.checkoutData?.user_id || 0;
+      const bookingKey = 'booking_data_' + userId;
+      const flightKey = 'selected_flight_' + userId;
+
+      const bookingData = JSON.parse(localStorage.getItem(bookingKey) || '{}');
 
       bookingData.flight_id = window.checkoutData.flight_id;
       bookingData.user_id = window.checkoutData.user_id;
@@ -761,7 +802,7 @@ let preventAutoSave = false;
       }
       bookingData.baggage_extra = baggageExtra;
 
-      const baseTotal = calculateTicketPrice(bookingData); 
+      const baseTotal = calculateTicketPrice(bookingData);
       bookingData.total_price = baseTotal;
 
       console.log("=== Dữ liệu JSON gửi lên checkout.php ===");
@@ -769,7 +810,7 @@ let preventAutoSave = false;
 
       fetch('checkout.php', {
           method: 'POST',
-          headers: { 
+          headers: {
               'Content-Type': 'application/json',
               'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
           },
@@ -780,9 +821,9 @@ let preventAutoSave = false;
           console.log('Kết quả thanh toán:', data);
 
           if (data.success) {
-              localStorage.removeItem('booking_data');
+              localStorage.removeItem(bookingKey);
               localStorage.removeItem('selectedSeats');
-              localStorage.removeItem('selected_flight');
+              localStorage.removeItem(flightKey);
               preventAutoSave = true;
 
               const firstAdultCard = document.querySelector('.passenger-card[data-type="adult"]');
@@ -829,7 +870,7 @@ let preventAutoSave = false;
                   `,
               }).then(() => {
                   updateTotal();
-                  resetBookingForm(); 
+                  resetBookingForm();
                   window.location.href = 'my-tickets.php';
               });
 
@@ -865,9 +906,10 @@ let preventAutoSave = false;
   function resetBookingForm() {
       preventAutoSave = true;
 
-      localStorage.removeItem('booking_data');
-      localStorage.removeItem('selectedSeats');
-      localStorage.removeItem('selected_flight');
+      const userId = window.checkoutData?.user_id || 0;
+      localStorage.removeItem('booking_data_' + userId);
+      localStorage.removeItem('selected_flight_' + userId);
+      localStorage.removeItem('selectedSeats'); // Legacy
 
       document.getElementById('contactName').value = '';
       document.getElementById('contactPhone').value = '';

@@ -1,6 +1,17 @@
 <?php
-require __DIR__.'/../db_connect.php';
-require __DIR__ . '/../app/Http/Controllers/RegisterController.php';
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+require_once __DIR__.'/../db_connect.php';
+require_once __DIR__ . '/../app/Http/Controllers/RegisterController.php';
+
+try {
+    $controller = $app->make(\App\Http\Controllers\RegisterController::class);
+    $msg = $controller->handleLegacyRegister();
+} catch (Exception $e) {
+    $msg = "Lỗi hệ thống: " . $e->getMessage();
+}
+
 include __DIR__ . '/includes/header.php';
 ?>
 

@@ -16,12 +16,25 @@ class PromotionRepository
 
     public function allWithAirlines()
     {
+        $today = now()->toDateString();
+
         return DB::table('promotions')
             ->join('airlines', 'airlines.id', '=', 'promotions.airline_id')
             ->select('promotions.*', 'airlines.name as airline_name', 'airlines.logo_url')
+            ->whereDate('promotions.end_date', '>=', $today)   // Ẩn đã hết hạn
             ->orderBy('promotions.start_date', 'desc')
             ->get()
-            ->map(fn($item) => (array)$item)
+            ->map(function($item) use ($today) {
+                $p = (array)$item;
+                if ($today < $p['start_date']) {
+                    $p['status']       = 'upcoming';
+                    $p['status_label'] = 'Chưa bắt đầu';
+                } else {
+                    $p['status']       = 'active';
+                    $p['status_label'] = 'Còn hạn';
+                }
+                return $p;
+            })
             ->toArray();
     }
 

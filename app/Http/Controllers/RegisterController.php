@@ -14,6 +14,32 @@ class RegisterController extends Controller
         $this->authService = $authService;
     }
 
+    /**
+     * Compatibility method for public/register.php
+     */
+    public function handleLegacyRegister()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            return null;
+        }
+
+        $fullname = trim($_POST['fullname'] ?? '');
+        $email    = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+
+        if ($this->authService->emailExists($email)) {
+            return 'Email này đã được đăng ký.';
+        }
+
+        $success = $this->authService->register($fullname, $email, $password);
+
+        if ($success) {
+            return 'Đăng ký thành công! Hãy đăng nhập.';
+        }
+
+        return 'Có lỗi xảy ra, vui lòng thử lại.';
+    }
+
     public function show()
     {
         return view('register');

@@ -4,12 +4,15 @@ include __DIR__ . '/../db_connect.php';
 require_once __DIR__.'/../app/Http/Controllers/ProfileController.php';
 
 /* CHECK LOGIN TRƯỚC */
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
-    exit;   
+    exit;
 }
 
-$controller = new ProfileController($conn);
+$controller = $app->make(\App\Http\Controllers\ProfileController::class);
 $user_id = $_SESSION['user_id'];
 $user = $controller->getProfile($user_id);
 

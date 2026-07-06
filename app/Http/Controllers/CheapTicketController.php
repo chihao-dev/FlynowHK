@@ -13,6 +13,29 @@ class CheapTicketController extends Controller
         $this->flightSearchService = $flightSearchService;
     }
 
+    /**
+     * Compatibility method for public/cheap-tickets.php
+     */
+    public function getSearchData()
+    {
+        $from       = $_POST['from'] ?? $_GET['from'] ?? null;
+        $to         = $_POST['to'] ?? $_GET['to'] ?? null;
+        $dateGo     = $_POST['date_go'] ?? $_GET['date_go'] ?? null;
+        $dateReturn = $_POST['date_return'] ?? $_GET['date_return'] ?? null;
+
+        $flights  = $this->flightSearchService->searchFlights($from, $to, $dateGo, $dateReturn);
+        $airports = $this->flightSearchService->getAirportsMap();
+
+        return [
+            'flights'     => $flights,
+            'airports'    => $airports,
+            'from'        => $from,
+            'to'          => $to,
+            'date_go'     => $dateGo,
+            'date_return' => $dateReturn,
+        ];
+    }
+
     public function index(Request $request)
     {
         if (session_status() === PHP_SESSION_NONE) {

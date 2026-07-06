@@ -1,5 +1,6 @@
-<?php 
-require __DIR__ . '/../app/Http/Controllers/GuideController.php';
+<?php
+require_once __DIR__ . '/../db_connect.php';
+require_once __DIR__ . '/../app/Http/Controllers/GuideController.php';
 include __DIR__.'/includes/header.php';
 ?>
 
